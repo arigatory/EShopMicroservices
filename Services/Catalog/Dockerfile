@@ -1,19 +1,20 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 as base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Catalog.API/Catalog.API.csproj", "Catalog.API/Catalog.API.csproj"]
-RUN dotnet restore "./Catalog.API/Catalog.API.csproj"
+COPY ["Services/Catalog/Catalog.API/Catalog.API.csproj", "Services/Catalog/Catalog.API/Catalog.API.csproj"]
+COPY ["BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj"]
+RUN dotnet restore "./Services/Catalog/Catalog.API/./Catalog.API.csproj"
 COPY . .
-WORKDIR "/src/Catalog.API"
+WORKDIR "/src/Services/Catalog/Catalog.API"
 RUN dotnet build "./Catalog.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build as publish
+FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./Catalog.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
